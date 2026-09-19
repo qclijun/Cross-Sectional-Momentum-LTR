@@ -11,6 +11,8 @@ from typing import Dict, List, Optional
 import os.path
 from YahooOHLCFetcher import *
 
+import joblib
+
 class MomentumPredictors:
     """
     Computes momentum predictors for cross-sectional strategies as described in:
@@ -156,7 +158,7 @@ if __name__ == "__main__":
     dates = pd.date_range('1995-01-01', '2023-12-31')
     # tickers = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA']
     
-    ohlc_path = r'Data\sp500_combined_ohlc_data.csv'
+    ohlc_path = r'Data/sp500_combined_ohlc_data.csv'
     if os.path.exists(ohlc_path ):
         ohlc_data = pd.read_csv(ohlc_path)
         prices = ohlc_data.loc[:,['Date','ticker','close']]
@@ -165,7 +167,7 @@ if __name__ == "__main__":
     else:
         START_DATE = "1995-01-01"
         END_DATE = (datetime.today() -  relativedelta(months=1, day=31)).strftime('%Y-%m-%d')
-        sp500_hist = pd.read_excel(r'Data\SP500_MonthEnd_Constituents_'+datetime(1998, 1, 1).date().strftime('%Y%m%d')+'.xlsx', index_col=0)
+        sp500_hist = pd.read_excel(r'Data/SP500_MonthEnd_Constituents_'+datetime(1998, 1, 1).date().strftime('%Y%m%d')+'.xlsx', index_col=0)
         all_tickers = list(pd.unique(sp500_hist .values.ravel()))
         TICKERS = [x for x in all_tickers if not (isinstance(x, str) and x == np.nan)]
 
@@ -180,8 +182,8 @@ if __name__ == "__main__":
             batch_size=50,  # Conservative batch size
             pause_between_batches=1.5
         )
-        
-        combined_df = pd.concat(data.values())
+        joblib.dump(ohlc_data, r'Data/sp500_ohlc_data.pkl')
+        combined_df = pd.concat(ohlc_data.values())
         
         # Reorder columns to have ticker first
         cols = ['ticker'] + [col for col in combined_df.columns if col != 'ticker']
@@ -198,7 +200,7 @@ if __name__ == "__main__":
     all_predictors = all_predictors .set_index(['Date','ticker'])
     
     
-    all_predictors.to_pickle(r'Data\LTR_Momentum_Indicators.pkl')
+    all_predictors.to_pickle(r'Data/LTR_Momentum_Indicators.pkl')
     print("Available predictors:")
     print(all_predictors.columns.tolist())
     

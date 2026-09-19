@@ -7,7 +7,7 @@ Created on Sat Mar 15 02:22:45 2025
 import yfinance as yf
 import pandas as pd
 import numpy as np
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 import time
 from datetime import datetime, timedelta,date
 from dateutil.relativedelta import relativedelta
@@ -21,7 +21,7 @@ def get_adjusted_ohlc(
     batch_size: int = 100,
     max_retries: int = 3,
     pause_between_batches: float = 1.0
-) -> Dict[str, pd.DataFrame]:
+) -> Tuple[Dict[str, pd.DataFrame], List[str]]:
     """
     Fetch adjusted OHLC prices from Yahoo Finance for multiple tickers with batch processing.
     
@@ -150,7 +150,7 @@ def get_adjusted_ohlc(
     print(f"Successfully processed: {len(processed_tickers)}/{len(tickers)} tickers")
     print(f"Failed tickers: {failed_tickers if failed_tickers else 'None'}")
     
-    return ohlc_data
+    return ohlc_data, failed_tickers
 
 def save_to_single_csv(data: Dict[str, pd.DataFrame], filename: str = 'yahoo_ohlc_data.csv'):
     """
